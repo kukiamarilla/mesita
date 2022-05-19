@@ -1,13 +1,17 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { Controller } from './controller';
 import { AppDataSource } from '../../data-source';
 import { Mesa } from '../models/mesa';
 import { Restaurante } from '../models/restaurante';
+import { nextTick } from 'process';
+import { MesaNotFoundException } from '../exceptions/MesaNotFoundException';
+import { RestauranteNotFoundException } from '../exceptions/RestauranteNotFoundException';
 
 class MesaController implements Controller {
   path = '/mesas';
   router = Router();
   repository = AppDataSource.getRepository(Mesa);
+  restauranteRepository = AppDataSource.getRepository(Restaurante);
 
   constructor() {
     this.initializeRoutes();
@@ -20,41 +24,55 @@ class MesaController implements Controller {
     this.router.delete(`${this.path}/:id`, this.delete);
   }
 
-  public show = async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id, 10);
-    const mesa = await this.repository.findOneBy({ id });
-    return res.json(mesa);
+  public show = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const mesa = await this.repository.findOneBy({ id });
+      if (!mesa) {
+        throw new MesaNotFoundException(id);
+      }
+      return res.json(mesa);
+    } catch (error) {
+      next(error);
+    }
   };
 
-  public store = async (req: Request, res: Response) => {
-    const mesa = await this.repository.save(req.body);
-    const restaurante = await AppDataSource.getRepository(
-      Restaurante
-    ).findOneBy({ id: mesa.restauranteId });
-    this.repository.save(mesa);
-    return res.json(mesa);
+  public store = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body = req.body;
+      const mesa = await Mesa.crear(body);
+      return res.json(mesa);
+    } catch (error) {
+      next(error);
+    }
   };
 
-  public update = async (req: Request, res: Response) => {
-    const { id, ...body } = req.body;
-    const mesaId = parseInt(req.params.id, 10);
-    await this.repository.update(
-      {
-        id: mesaId,
-      },
-      body
-    );
-    const mesa = await this.repository.findOneBy({
-      id: mesaId,
-    });
-    return res.json(mesa);
+  public update = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body = req.body;
+      const id = parseInt(req.params.id, 10);
+      const mesa = await this.repository.findOneBy({ id });
+      if (!mesa) {
+        throw new MesaNotFoundException(id);
+      }
+      return res.json(await mesa.actualizar(body));
+    } catch (error) {
+      next(error);
+    }
   };
 
-  public delete = async (req: Request, res: Response) => {
-    await this.repository.delete({
-      id: parseInt(req.params.id, 10),
-    });
-    return res.json({ message: 'Mesa eliminada' });
+  public delete = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const mesa = await this.repository.findOneBy({ id });
+      if (!mesa) {
+        throw new MesaNotFoundException(id);
+      }
+      mesa.eliminar();
+      return res.json({ message: 'Mesa eliminada' });
+    } catch (error) {
+      next(error);
+    }
   };
 }
 

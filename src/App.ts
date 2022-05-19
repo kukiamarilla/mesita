@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import { Controller } from './controllers/controller';
+import errorMiddleware from './middleware/error.middleware';
 
 class App {
   public app: express.Application;
@@ -11,11 +12,12 @@ class App {
     this.app = express();
     this.port = port;
 
-    this.initializeMiddlewares();
+    this.initializeMiddleware();
     this.initializeControllers(controllers);
+    this.initializeErrorHandling();
   }
 
-  private initializeMiddlewares() {
+  private initializeMiddleware() {
     this.app.use(bodyParser.json());
   }
 
@@ -23,6 +25,10 @@ class App {
     controllers.forEach((controller) => {
       this.app.use('/', controller.router);
     });
+  }
+
+  private initializeErrorHandling() {
+    this.app.use(errorMiddleware);
   }
 
   public listen() {

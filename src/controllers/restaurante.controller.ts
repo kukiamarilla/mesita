@@ -1,8 +1,9 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { Controller } from './controller';
 import * as express from 'express';
 import { Restaurante } from '../models/restaurante';
 import { AppDataSource } from '../../data-source';
+import { RestauranteNotFoundException } from '../exceptions/RestauranteNotFoundException';
 
 class RestauranteController implements Controller {
   path = '/restaurantes';
@@ -26,37 +27,54 @@ class RestauranteController implements Controller {
     return res.json(restaurantes);
   };
 
-  public show = async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id, 10);
-    const restaurante = await this.repository.findOneBy({ id });
-    return res.json(restaurante);
+  public show = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const restaurante = await this.repository.findOneBy({ id });
+      if (!restaurante) {
+        throw new RestauranteNotFoundException(id);
+      }
+      return res.json(restaurante);
+    } catch (error) {
+      next(error);
+    }
   };
 
-  public store = async (req: Request, res: Response) => {
-    const restaurante = await this.repository.save(req.body);
-    return res.json(restaurante);
+  public store = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const restaurante = await this.repository.save(req.body);
+      return res.json(restaurante);
+    } catch (error) {
+      next(error);
+    }
   };
 
-  public update = async (req: Request, res: Response) => {
-    const { id, ...body } = req.body;
-    const restauranteId = parseInt(req.params.id, 10);
-    await this.repository.update(
-      {
-        id: restauranteId,
-      },
-      body
-    );
-    const restaurante = await this.repository.findOneBy({
-      id: restauranteId,
-    });
-    return res.json(restaurante);
+  public update = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body = (({ id, ...body }) => body)(req.body);
+      const id = parseInt(req.params.id, 10);
+      const restaurante = await this.repository.findOneBy({ id });
+      if (!restaurante) {
+        return next(new RestauranteNotFoundException(id));
+      }
+      return res.json(await restaurante.actualizar(body));
+    } catch (error) {
+      next(error);
+    }
   };
 
-  public delete = async (req: Request, res: Response) => {
-    await AppDataSource.manager.delete(Restaurante, {
-      id: parseInt(req.params.id, 10),
-    });
-    return res.json({ message: 'Restaurante eliminado' });
+  public delete = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const restaurante = await this.repository.findOneBy({ id });
+      if (!restaurante) {
+        throw new RestauranteNotFoundException(id);
+      }
+      restaurante.eliminar();
+      return res.json({ message: 'Restaurante eliminado' });
+    } catch (error) {
+      next(error);
+    }
   };
 }
 
