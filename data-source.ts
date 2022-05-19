@@ -12,7 +12,7 @@ export const AppDataSource = new DataSource({
   logging: false,
   entities: ['./src/models/*.{js,ts}'],
   migrations: ['./src/migrations/*.{js,ts}'],
-  subscribers: [],
+  subscribers: ['src/subscriber/**/*{.js,.ts}'],
 });
 
 AppDataSource.initialize();
