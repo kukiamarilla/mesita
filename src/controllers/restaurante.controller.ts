@@ -70,7 +70,7 @@ class RestauranteController implements Controller {
       if (!restaurante) {
         throw new RestauranteNotFoundException(id);
       }
-      restaurante.eliminar();
+      await restaurante.eliminar();
       return res.json({ message: 'Restaurante eliminado' });
     } catch (error) {
       next(error);
