@@ -1,7 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { Restaurante } from './restaurante';
 import { AppDataSource } from '../../data-source';
 import { RestauranteNotFoundException } from '../exceptions/RestauranteNotFoundException';
+import { Reserva } from './reserva';
 
 @Entity()
 export class Mesa {
@@ -25,6 +32,9 @@ export class Mesa {
 
   @ManyToOne(() => Restaurante, (restaurante) => restaurante.mesas)
   restaurante!: Restaurante;
+
+  @OneToMany(() => Reserva, (reserva) => reserva.mesa)
+  reservas!: Reserva[];
 
   public static async crear(body: any): Promise<Mesa> {
     body = (({ id, ...body }) => body)(body);

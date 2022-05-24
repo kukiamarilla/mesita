@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Mesa } from './mesa';
 import { AppDataSource } from '../../data-source';
+import { Reserva } from './reserva';
 
 @Entity()
 export class Restaurante {
@@ -23,6 +24,9 @@ export class Restaurante {
   @OneToMany(() => Mesa, (mesa) => mesa.restaurante, { eager: true })
   @JoinTable()
   mesas!: Mesa[];
+
+  @OneToMany(() => Reserva, (reserva) => reserva.restaurante)
+  reservas!: Reserva[];
 
   public static async crear(body: any): Promise<Restaurante> {
     body = (({ id, ...body }) => body)(body);
