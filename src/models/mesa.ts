@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   OneToMany,
+  JoinTable,
 } from 'typeorm';
 import { Restaurante } from './restaurante';
 import { AppDataSource } from '../../data-source';
@@ -31,7 +32,8 @@ export class Mesa {
   capacidad: number;
 
   @ManyToOne(() => Restaurante, (restaurante) => restaurante.mesas)
-  restaurante!: Restaurante;
+  @JoinTable()
+  restaurante!: Promise<Restaurante>;
 
   @OneToMany(() => Reserva, (reserva) => reserva.mesa)
   reservas!: Reserva[];
@@ -67,5 +69,11 @@ export class Mesa {
   public eliminar(): void {
     const mesaRepository = AppDataSource.getRepository(Mesa);
     mesaRepository.delete(this.id);
+  }
+
+  public static async existe(id: number): Promise<boolean> {
+    const mesaRepository = AppDataSource.getRepository(Mesa);
+    const mesa = await mesaRepository.findOneBy({ id });
+    return !!mesa;
   }
 }

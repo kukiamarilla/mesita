@@ -46,4 +46,10 @@ export class Restaurante {
     await this.mesas.forEach(async (mesa) => await mesa.eliminar());
     await restauranteRepository.delete(this.id);
   }
+
+  public static async existe(id: number): Promise<boolean> {
+    const restauranteRepository = AppDataSource.getRepository(Restaurante);
+    const restaurante = await restauranteRepository.findOneBy({ id });
+    return !!restaurante;
+  }
 }
