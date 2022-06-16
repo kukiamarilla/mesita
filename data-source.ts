@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
-require('dotenv').config()
+import 'dotenv/config'
 export const AppDataSource = new DataSource({
   type: process.env.DB_DRIVER,
   host: process.env.DB_HOST,
