@@ -18,11 +18,17 @@ class ProductoController implements Controller {
   }
 
   initializeRoutes(): void {
+    this.router.get(this.path, this.index);
     this.router.get(`${this.path}/:id`, this.show);
     this.router.post(this.path, this.store);
     this.router.put(`${this.path}/:id`, this.update);
     this.router.delete(`${this.path}/:id`, this.delete);
   }
+
+  public index = async (req: Request, res: Response) => {
+    const productos = await this.repository.find();
+    return res.json(productos);
+  };
 
   public show = async (req: Request, res: Response, next: NextFunction) => {
     try {
