@@ -20,7 +20,7 @@ import {
     @Column()
     nombre!: string;
   
-    @ManyToOne(() => Categoria, (categoria) => categoria.producto)
+    @ManyToOne(() => Categoria, (categoria) => categoria.productos)
     @JoinTable()
     categoria!: Promise<Categoria>;
   
