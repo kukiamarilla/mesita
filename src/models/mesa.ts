@@ -10,6 +10,7 @@ import { Restaurante } from './restaurante';
 import { AppDataSource } from '../../data-source';
 import { RestauranteNotFoundException } from '../exceptions/RestauranteNotFoundException';
 import { Reserva } from './reserva';
+import { Consumicion } from './consumicion';
 
 @Entity()
 export class Mesa {
@@ -37,6 +38,9 @@ export class Mesa {
 
   @OneToMany(() => Reserva, (reserva) => reserva.mesa)
   reservas!: Reserva[];
+
+  @OneToMany(() => Consumicion, (consumicion) => consumicion.mesa)
+  consumiciones!: Consumicion[];
 
   public static async crear(body: any): Promise<Mesa> {
     body = (({ id, ...body }) => body)(body);
@@ -75,5 +79,15 @@ export class Mesa {
     const mesaRepository = AppDataSource.getRepository(Mesa);
     const mesa = await mesaRepository.findOneBy({ id });
     return !!mesa;
+  }
+
+  public async consumicion(): Promise<Consumicion | null> {
+    const consumicionRepository = AppDataSource.getRepository(Consumicion);
+    const mesa: Mesa = this;
+    const consumicion = await consumicionRepository.findOne({
+      where: { mesa: { id: mesa.id }, estado: 'abierto' },
+    });
+    if (!consumicion) return null;
+    return consumicion;
   }
 }
