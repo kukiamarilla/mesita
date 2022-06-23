@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
+import * as cors from 'cors';
 import { Controller } from './controllers/controller';
 import errorMiddleware from './middleware/error.middleware';
 
@@ -19,6 +20,7 @@ class App {
 
   private initializeMiddleware() {
     this.app.use(bodyParser.json());
+    this.app.use(cors());
   }
 
   private initializeControllers(controllers: Controller[]) {

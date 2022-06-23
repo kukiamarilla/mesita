@@ -33,7 +33,6 @@ export class Mesa {
   capacidad: number;
 
   @ManyToOne(() => Restaurante, (restaurante) => restaurante.mesas)
-  @JoinTable()
   restaurante!: Promise<Restaurante>;
 
   @OneToMany(() => Reserva, (reserva) => reserva.mesa)

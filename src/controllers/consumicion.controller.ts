@@ -47,7 +47,7 @@ class ConsumicionController implements Controller {
       const consumicion = await this.repository.findOneBy({ id });
       if (!consumicion) throw new ConsumicionNotFoundException(id);
       const cliente = body.cliente;
-      return res.json(consumicion.setCliente(cliente));
+      return res.json(await consumicion.setCliente(cliente));
     } catch (error) {
       next(error);
     }

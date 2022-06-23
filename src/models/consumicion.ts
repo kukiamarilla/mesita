@@ -13,13 +13,14 @@ import { AppDataSource } from '../../data-source';
 import { OneToMany } from 'typeorm';
 import { DetalleConsumicion } from './detalleConsumicion';
 import { ConsumicionAlreadyOpenException } from '../exceptions/ConsumicionAlreadyOpenException';
+import { ConsumicionClosedException } from '../exceptions/ConsumicionClosedException';
 
 @Entity()
 export class Consumicion {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => Cliente, (cliente) => cliente.consumiciones)
+  @ManyToOne(() => Cliente, (cliente) => cliente.consumiciones, { eager: true })
   @JoinTable()
   cliente!: Cliente;
 
@@ -70,6 +71,7 @@ export class Consumicion {
     const clienteRepository = AppDataSource.getRepository(Cliente);
     const cliente = await clienteRepository.findOneBy({ id: clienteId });
     if (!cliente) throw new ClienteNotFoundException(clienteId);
+    if (this.cerrado) throw new ConsumicionClosedException(this.id);
     this.cliente = cliente;
     const consumicionRepository = AppDataSource.getRepository(Consumicion);
     return await consumicionRepository.save(this);

@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   OneToMany,
+  JoinTable,
 } from 'typeorm';
 import { Categoria } from './categoria';
 import { AppDataSource } from '../../data-source';
@@ -20,7 +21,10 @@ export class Producto {
   @Column()
   precio!: number;
 
-  @ManyToOne(() => Categoria, (categoria) => categoria.productos)
+  @ManyToOne(() => Categoria, (categoria) => categoria.productos, {
+    eager: true,
+  })
+  @JoinTable()
   categoria!: Categoria;
 
   @OneToMany(
