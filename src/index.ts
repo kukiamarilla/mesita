@@ -19,7 +19,7 @@ const app = new App(
     new ConsumicionController(),
     new DetalleConsumicionController(),
   ],
-  3000
+  8000
 );
 
 app.listen();
