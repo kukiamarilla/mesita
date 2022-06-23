@@ -1,6 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { Categoria } from './categoria';
 import { AppDataSource } from '../../data-source';
+import { DetalleConsumicion } from './detalleConsumicion';
 
 @Entity()
 export class Producto {
@@ -15,6 +22,12 @@ export class Producto {
 
   @ManyToOne(() => Categoria, (categoria) => categoria.productos)
   categoria!: Categoria;
+
+  @OneToMany(
+    () => DetalleConsumicion,
+    (detalleConsumicion) => detalleConsumicion.producto
+  )
+  detalleConsumiciones!: DetalleConsumicion[];
 
   public static async crear(body: any): Promise<Producto> {
     body = (({ id, ...body }) => body)(body);
